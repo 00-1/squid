@@ -6,7 +6,7 @@ import "./styles.css";
 function App() {
   return (
     <div className="App">
-      <h2>Start editing to see some masdasdagic happen!</h2>
+      <h2>squid</h2>
     </div>
   );
 }
