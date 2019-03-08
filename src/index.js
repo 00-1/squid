@@ -1,15 +1,11 @@
-import React from "react";
-import ReactDOM from "react-dom";
+import ReactDOM from 'react-dom';
+import './index.css';
+import 'bootstrap/dist/css/bootstrap.css';
+import { makeMainRoutes } from './routes';
 
-import "./styles.css";
+const routes = makeMainRoutes();
 
-function App() {
-  return (
-    <div className="App">
-      <h2>squid</h2>
-    </div>
-  );
-}
-
-const rootElement = document.getElementById("root");
-ReactDOM.render(<App />, rootElement);
+ReactDOM.render(
+  routes,
+  document.getElementById('root')
+);
