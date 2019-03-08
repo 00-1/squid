@@ -1,2 +1,0 @@
-# squid
-Created with CodeSandbox
