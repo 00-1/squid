@@ -33,7 +33,6 @@ export default class Auth {
     this.auth0.parseHash((err, authResult) => {
       if (authResult && authResult.accessToken && authResult.idToken) {
         this.setSession(authResult);
-        return true;
       } else if (err) {
         history.replace("/");
         console.log(err);
@@ -65,6 +64,7 @@ export default class Auth {
   }
 
   renewSession() {
+    console.log(this.accessToken, this.idToken, this.expiresAt);
     this.auth0.checkSession({}, (err, authResult) => {
       if (authResult && authResult.accessToken && authResult.idToken) {
         this.setSession(authResult);
