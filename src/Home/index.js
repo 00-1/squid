@@ -3,23 +3,14 @@ import Content from "../Content";
 
 export default ({
   history,
-  auth: { isAuthenticated, login, renewSession }
+  auth: { isAuthenticated, login, startSession }
 }) => {
-  useEffect(() => {
-    history.replace("/callback");
-    renewSession();
-  }, []);
+  useEffect(startSession, []);
 
   return (
     <div className="home">
-      {isAuthenticated() && localStorage.getItem("isLoggedIn") === "true" ? (
+      {isAuthenticated() && localStorage.getItem("isLoggedIn") === "true" && (
         <Content />
-      ) : (
-        <p>
-          {"You are not logged in! Please "}
-          <button onClick={login}>Log In</button>
-          {" to continue."}
-        </p>
       )}
     </div>
   );

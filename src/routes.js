@@ -1,33 +1,29 @@
 import React from "react";
-import { Route, Router, Switch } from "react-router-dom";
+import { Route, Router } from "react-router-dom";
 import Bar from "./Bar";
 import Home from "./Home";
 import Loading from "./Loading";
+import Landing from "./Landing";
 import Auth from "./Auth";
 import history from "./history";
 
 const auth = new Auth();
-
-const hash = nextState =>
-  /access_token|id_token|error/.test(nextState.location.hash) &&
-  auth.handleAuthentication();
 
 export default () => {
   return (
     <Router history={history} component={Bar}>
       <>
         <Route render={props => <Bar auth={auth} {...props} />} />
-        <Switch>
-          <Route path="/bye" exact render={props => <p>Bye.</p>} />
-          <Route render={props => <Home auth={auth} {...props} />} />
-        </Switch>
+        <Route path="/hi" exact render={props => <Landing auth={auth} />} />
+        <Route
+          path="/"
+          exact
+          render={props => <Home auth={auth} {...props} />}
+        />
 
         <Route
           path="/callback"
-          render={props => {
-            hash(props);
-            return <Loading {...props} />;
-          }}
+          render={props => <Loading auth={auth} {...props} />}
         />
       </>
     </Router>

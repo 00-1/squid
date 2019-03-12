@@ -12,7 +12,7 @@ export default class Auth {
     clientID: AUTH_CONFIG.clientId,
     redirectUri: AUTH_CONFIG.callbackUrl,
     responseType: "token id_token",
-    scope: "openid"
+    scope: "openid email profile"
   });
 
   auth1 = new auth0.Authentication({
@@ -27,8 +27,11 @@ export default class Auth {
     this.handleAuthentication = this.handleAuthentication.bind(this);
     this.isAuthenticated = this.isAuthenticated.bind(this);
     this.getAccessToken = this.getAccessToken.bind(this);
+    this.getUser = this.getUser.bind(this);
+    this.userInfo = this.userInfo.bind(this);
     this.getIdToken = this.getIdToken.bind(this);
     this.renewSession = this.renewSession.bind(this);
+    this.startSession = this.startSession.bind(this);
   }
 
   login() {
@@ -36,14 +39,35 @@ export default class Auth {
   }
 
   handleAuthentication() {
-    this.auth0.parseHash((err, authResult) => {
-      if (authResult && authResult.accessToken && authResult.idToken) {
-        this.setSession(authResult);
-      } else if (err) {
+    if (/access_token|id_token|error/.test(window.location.hash)) {
+      this.auth0.parseHash((err, authResult) => {
+        if (authResult && authResult.accessToken && authResult.idToken) {
+          this.setSession(authResult);
+        } else if (err) {
+          history.replace("/hi");
+          console.log(err);
+        }
+      });
+    } else {
+      history.replace("/hi");
+    }
+  }
+
+  userInfo() {
+    this.auth1.userInfo(this.accessToken, (err, authResult) => {
+      if (authResult) {
+        this.user = authResult;
         history.replace("/");
+        console.log(authResult);
+      } else {
+        history.replace("/hi");
         console.log(err);
       }
     });
+  }
+
+  getUser() {
+    return this.user ? this.user : { nickname: "?" };
   }
 
   getAccessToken() {
@@ -64,23 +88,30 @@ export default class Auth {
     this.idToken = authResult.idToken;
     this.expiresAt = expiresAt;
 
-    // navigate to the home route
-    history.replace("/");
+    this.userInfo();
   }
 
   renewSession() {
-    console.log(this.accessToken, this.idToken, this.expiresAt);
     this.auth0.checkSession({}, (err, authResult) => {
       if (authResult && authResult.accessToken && authResult.idToken) {
         this.setSession(authResult);
       } else if (err) {
-        this.logout();
         console.log(err);
+        history.replace("/hi");
       }
     });
   }
 
-  clearToken() {
+  startSession() {
+    if (!this.isAuthenticated()) {
+      history.replace("/callback");
+      this.renewSession();
+    }
+  }
+
+  logout() {
+    // log out locally
+    // use if the token is already invalid
     // Remove tokens and expiry time
     this.accessToken = null;
     this.idToken = null;
@@ -90,15 +121,8 @@ export default class Auth {
     localStorage.removeItem("isLoggedIn");
   }
 
-  logout() {
-    // log out locally
-    // use if the token is already invalid
-    this.clearToken();
-    history.replace("/");
-  }
-
   logoutRedirect() {
-    this.clearToken();
+    this.logout();
 
     // log out centrally
     // use if the token is still valid
