@@ -15,9 +15,15 @@ export default class Auth {
     scope: "openid"
   });
 
+  auth1 = new auth0.Authentication({
+    domain: AUTH_CONFIG.domain,
+    clientID: AUTH_CONFIG.clientId
+  });
+
   constructor() {
     this.login = this.login.bind(this);
     this.logout = this.logout.bind(this);
+    this.logoutRedirect = this.logoutRedirect.bind(this);
     this.handleAuthentication = this.handleAuthentication.bind(this);
     this.isAuthenticated = this.isAuthenticated.bind(this);
     this.getAccessToken = this.getAccessToken.bind(this);
@@ -36,7 +42,6 @@ export default class Auth {
       } else if (err) {
         history.replace("/");
         console.log(err);
-        alert(`Error: ${err.error}. Check the console for further details.`);
       }
     });
   }
@@ -71,14 +76,11 @@ export default class Auth {
       } else if (err) {
         this.logout();
         console.log(err);
-        alert(
-          `Could not get a new token (${err.error}: ${err.error_description}).`
-        );
       }
     });
   }
 
-  logout() {
+  clearToken() {
     // Remove tokens and expiry time
     this.accessToken = null;
     this.idToken = null;
@@ -86,9 +88,23 @@ export default class Auth {
 
     // Remove isLoggedIn flag from localStorage
     localStorage.removeItem("isLoggedIn");
+  }
 
-    // navigate to the home route
+  logout() {
+    // log out locally
+    // use if the token is already invalid
+    this.clearToken();
     history.replace("/");
+  }
+
+  logoutRedirect() {
+    this.clearToken();
+
+    // log out centrally
+    // use if the token is still valid
+    window.location.href = `${this.auth1.buildLogoutUrl()}?returnTo=${
+      AUTH_CONFIG.logoutUrl
+    }`;
   }
 
   isAuthenticated() {
