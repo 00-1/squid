@@ -10,7 +10,7 @@ export default class Auth {
   auth0 = new auth0.WebAuth({
     domain: AUTH_CONFIG.domain,
     clientID: AUTH_CONFIG.clientId,
-    redirectUri: AUTH_CONFIG.callbackUrl,
+    redirectUri: AUTH_CONFIG.url + AUTH_CONFIG.callbackUrl,
     responseType: "token id_token",
     scope: "openid email profile"
   });
@@ -44,12 +44,12 @@ export default class Auth {
         if (authResult && authResult.accessToken && authResult.idToken) {
           this.setSession(authResult);
         } else if (err) {
-          history.replace("/hi");
+          history.replace(AUTH_CONFIG.logoutUrl);
           console.log(err);
         }
       });
     } else {
-      history.replace("/hi");
+      history.replace(AUTH_CONFIG.logoutUrl);
     }
   }
 
@@ -60,7 +60,7 @@ export default class Auth {
         history.replace("/");
         console.log(authResult);
       } else {
-        history.replace("/hi");
+        history.replace(AUTH_CONFIG.logoutUrl);
         console.log(err);
       }
     });
@@ -97,14 +97,14 @@ export default class Auth {
         this.setSession(authResult);
       } else if (err) {
         console.log(err);
-        history.replace("/hi");
+        history.replace(AUTH_CONFIG.logoutUrl);
       }
     });
   }
 
   startSession() {
     if (!this.isAuthenticated()) {
-      history.replace("/callback");
+      history.replace(AUTH_CONFIG.callbackUrl);
       this.renewSession();
     }
   }
@@ -126,9 +126,8 @@ export default class Auth {
 
     // log out centrally
     // use if the token is still valid
-    window.location.href = `${this.auth1.buildLogoutUrl()}?returnTo=${
-      AUTH_CONFIG.logoutUrl
-    }`;
+    window.location.href = `${this.auth1.buildLogoutUrl()}?returnTo=${AUTH_CONFIG.url +
+      AUTH_CONFIG.logoutUrl}`;
   }
 
   isAuthenticated() {
