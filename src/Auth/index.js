@@ -1,24 +1,71 @@
+import React, { useEffect, useState } from "react";
 import history from "../history";
 import auth0 from "auth0-js";
 import { AUTH_CONFIG } from "./auth0-variables";
 
-export default class Auth {
+const WebAuth = new auth0.WebAuth({
+  domain: AUTH_CONFIG.domain,
+  clientID: AUTH_CONFIG.clientId,
+  redirectUri: AUTH_CONFIG.url + AUTH_CONFIG.callbackUrl,
+  responseType: "token id_token",
+  scope: "openid email profile"
+});
+
+const Authentication = new auth0.Authentication({
+  domain: AUTH_CONFIG.domain,
+  clientID: AUTH_CONFIG.clientId
+});
+
+const Auth = () => {
+  // state variables
+  const [accessToken, setAccessToken] = useState();
+  const [idToken, setIdToken] = useState();
+  const [expiresAt, setexpiresAt] = useState();
+
+  useEffect(() => {
+    if (/access_token|id_token|error/.test(window.location.hash)) {
+      this.auth0.parseHash((err, authResult) => {
+        if (authResult && authResult.accessToken && authResult.idToken) {
+          //this.setSession(authResult);
+          console.log("set session!");
+        } else if (err) {
+          history.replace(AUTH_CONFIG.logoutUrl);
+          console.log(err);
+        }
+      });
+    } else {
+      history.replace(AUTH_CONFIG.logoutUrl);
+    }
+  }, []);
+
+  return (
+    <div>
+      <p>access token {accessToken}</p>
+      <p>id token {idToken}</p>
+      <p>expires at {expiresAt}</p>
+    </div>
+  );
+};
+
+export default () => <Auth />;
+
+class AAuth {
   accessToken;
   idToken;
   expiresAt;
 
-  auth0 = new auth0.WebAuth({
-    domain: AUTH_CONFIG.domain,
-    clientID: AUTH_CONFIG.clientId,
-    redirectUri: AUTH_CONFIG.url + AUTH_CONFIG.callbackUrl,
-    responseType: "token id_token",
-    scope: "openid email profile"
-  });
+  // auth0 = new auth0.WebAuth({
+  //   domain: AUTH_CONFIG.domain,
+  //   clientID: AUTH_CONFIG.clientId,
+  //   redirectUri: AUTH_CONFIG.url + AUTH_CONFIG.callbackUrl,
+  //   responseType: "token id_token",
+  //   scope: "openid email profile"
+  // });
 
-  auth1 = new auth0.Authentication({
-    domain: AUTH_CONFIG.domain,
-    clientID: AUTH_CONFIG.clientId
-  });
+  // auth1 = new auth0.Authentication({
+  //   domain: AUTH_CONFIG.domain,
+  //   clientID: AUTH_CONFIG.clientId
+  // });
 
   constructor() {
     this.login = this.login.bind(this);

@@ -1,5 +1,5 @@
 import ReactDOM from "react-dom";
 import "./index.css";
-import routes from "./routes";
+import Auth from "./Auth";
 
-ReactDOM.render(routes(), document.getElementById("root"));
+ReactDOM.render(Auth(), document.getElementById("root"));
